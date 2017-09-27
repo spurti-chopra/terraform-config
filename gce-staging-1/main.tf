@@ -31,7 +31,7 @@ variable "syslog_address_org" {}
 variable "latest_docker_image_worker" {}
 
 variable "latest_ci_onion_image" {
-  default = "eco-emissary-99515/travis-ci-onion-2016-1506520663-00c36c8-dirty"
+  default = "eco-emissary-99515/travis-ci-onion-2016-1506522206-00c36c8-dirty"
 }
 
 terraform {
@@ -118,8 +118,6 @@ resource "google_compute_instance" "bonanza_windows_test" {
   }
 
   network_interface {
-    subnetwork = "buildorg"
-
     access_config {
       # ephemeral ip
     }

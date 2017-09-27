@@ -31,7 +31,7 @@ variable "syslog_address_org" {}
 variable "latest_docker_image_worker" {}
 
 variable "latest_ci_onion_image" {
-  default = "eco-emissary-99515/travis-ci-onion-2016-1506524609-1b3d949-dirty"
+  default = "eco-emissary-99515/travis-ci-onion-2016-1506526886-ca4da67-dirty"
 }
 
 terraform {

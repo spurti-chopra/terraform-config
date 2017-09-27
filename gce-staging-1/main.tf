@@ -30,6 +30,10 @@ variable "syslog_address_org" {}
 
 variable "latest_docker_image_worker" {}
 
+variable "latest_ci_onion_image" {
+  default = "eco-emissary-99515/travis-ci-onion-2016-1506520663-00c36c8-dirty"
+}
+
 terraform {
   backend "s3" {
     bucket         = "travis-terraform-state"
@@ -98,4 +102,30 @@ export TRAVIS_WORKER_GCE_SUBNETWORK=buildorg
 export TRAVIS_WORKER_POOL_SIZE=30
 export TRAVIS_WORKER_TRAVIS_SITE=org
 EOF
+}
+
+resource "google_compute_instance" "bonanza_windows_test" {
+  name         = "${var.env}-${var.index}-bonanza-windows-test-gce"
+  machine_type = "n1-standard-2"
+  zone         = "europe-west1-c"
+  tags         = ["bonanza-windows", "${var.env}", "org"]
+  project      = "travis-staging-1"
+
+  disk {
+    auto_delete = true
+    image       = "${var.latest_ci_onion_image}"
+    type        = "pd-ssd"
+  }
+
+  network_interface {
+    subnetwork = "buildorg"
+
+    access_config {
+      # ephemeral ip
+    }
+  }
+
+  metadata {
+    "block-project-ssh-keys" = "true"
+  }
 }

@@ -9,7 +9,7 @@ resource "aws_cloudwatch_dashboard" "main" {
             "x": 0,
             "y": 0,
             "width": 24,
-            "height": 6,
+            "height": 9,
             "properties": {
                 "view": "timeSeries",
                 "stacked": true,
@@ -69,6 +69,24 @@ resource "aws_cloudwatch_dashboard" "main" {
                         "min": ${var.worker_asg_min_size}
                     }
                 }
+            }
+        },
+        {
+            "type": "metric",
+            "x": 6,
+            "y": 0,
+            "width": 24,
+            "height": 9,
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "us-east-1",
+                "metrics": [
+                    [ "Travis/${var.site}${var.env == "staging" ? "-staging" : ""}", "v1.travis.rabbitmq.queues.${var.env}.builds.ec2.messages" ],
+                    [ ".", "v1.travis.rabbitmq.queues.${var.env}.builds.ec2.messages_ready" ],
+                    [ ".", "v1.travis.rabbitmq.queues.${var.env}.builds.ec2.messages_unacked" ]
+                ],
+                "title": "Messages"
             }
         }
     ]

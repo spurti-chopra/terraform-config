@@ -81,21 +81,14 @@ data "template_cloudinit_config" "cloud_config" {
 
 resource "aws_instance" "bench-instance" {
   count                  = 4
-  instance_type          = "c5.9xlarge"
+  instance_type          = "r4.8xlarge"
   user_data              = "${data.template_cloudinit_config.cloud_config.rendered}"
   ami                    = "ami-a43c8dde"
   vpc_security_group_ids = ["sg-7587c00f"]
   subnet_id              = "subnet-2f369b66"
 
-  ebs_block_device {
-    device_name = "/dev/xvdc"
-    volume_type = "io1"
-    volume_size = "750"
-    iops        = "2250"
-  }
-
   tags {
-    Name = "${format("bench-instance-%02d", count.index + 1)}"
+    Name = "${format("bench-instance-r4-%02d", count.index + 1)}"
   }
 }
 

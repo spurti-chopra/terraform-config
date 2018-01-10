@@ -12,6 +12,6 @@ CONFIG_FILES := \
 	config/worker-org.env
 
 .PHONY: .config
-.config: $(CONFIG_FILES) $(ENV_NAME).tfvars
+.config: $(CONFIG_FILES) $(ENV_NAME).auto.tfvars
 
 $(CONFIG_FILES): config/.written config/.gce-keys-written

@@ -6,9 +6,6 @@ variable "gce_bastion_image" {
   default = "eco-emissary-99515/bastion-1496867305"
 }
 
-variable "gce_gcloud_zone" {}
-variable "gce_heroku_org" {}
-
 variable "gce_worker_image" {
   default = "eco-emissary-99515/tfw-1499625597"
 }
@@ -19,18 +16,11 @@ variable "index" {
   default = 1
 }
 
-variable "job_board_url" {}
-
 variable "travisci_net_external_zone_id" {
   default = "Z2RI61YP4UWSIO"
 }
 
-variable "syslog_address_com" {}
-variable "syslog_address_org" {}
-
 variable "latest_docker_image_worker" {}
-
-variable "deny_target_ip_ranges" {}
 
 terraform {
   backend "s3" {
@@ -51,6 +41,10 @@ provider "google" {
 provider "aws" {}
 provider "heroku" {}
 
+data "external" "secrets" {
+  program = ["${path.module}/../bin/generate-secrets"]
+}
+
 module "gce_project_1" {
   source                        = "../modules/gce_project"
   bastion_config                = "${file("${path.module}/config/bastion.env")}"
@@ -58,15 +52,15 @@ module "gce_project_1" {
   env                           = "${var.env}"
   github_users                  = "${var.github_users}"
   gcloud_cleanup_account_json   = "${file("${path.module}/config/gce-cleanup-staging-1.json")}"
-  gcloud_cleanup_job_board_url  = "${var.job_board_url}"
+  gcloud_cleanup_job_board_url  = "${data.external.secrets.result["job_board_url"]}"
   gcloud_cleanup_loop_sleep     = "2m"
   gcloud_cleanup_scale          = "worker=1:Hobby"
-  gcloud_zone                   = "${var.gce_gcloud_zone}"
-  heroku_org                    = "${var.gce_heroku_org}"
+  gcloud_zone                   = "${data.external.secrets.result["gce_gcloud_zone"]}"
+  heroku_org                    = "${data.external.secrets.result["gce_heroku_org"]}"
   index                         = "${var.index}"
   project                       = "travis-staging-1"
-  syslog_address_com            = "${var.syslog_address_com}"
-  syslog_address_org            = "${var.syslog_address_org}"
+  syslog_address_com            = "${data.external.secrets.result["syslog_address_com"]}"
+  syslog_address_org            = "${data.external.secrets.result["syslog_address_org"]}"
   travisci_net_external_zone_id = "${var.travisci_net_external_zone_id}"
   worker_account_json_com       = "${file("${path.module}/config/gce-workers-staging-1.json")}"
   worker_account_json_org       = "${file("${path.module}/config/gce-workers-staging-1.json")}"
@@ -76,7 +70,7 @@ module "gce_project_1" {
   worker_instance_count_com = 4
   worker_instance_count_org = 4
 
-  deny_target_ip_ranges = ["${split(",", var.deny_target_ip_ranges)}"]
+  deny_target_ip_ranges = ["${split(",", data.external.secrets.result["deny_target_ip_ranges"])}"]
 
   worker_config_com = <<EOF
 ### worker.env

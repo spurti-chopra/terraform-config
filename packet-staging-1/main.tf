@@ -1,7 +1,3 @@
-variable "duo_api_hostname" {}
-variable "duo_integration_key" {}
-variable "duo_secret_key" {}
-
 variable "env" {
   default = "staging"
 }
@@ -15,11 +11,7 @@ variable "index" {
 variable "latest_docker_image_amethyst" {}
 variable "latest_docker_image_garnet" {}
 variable "latest_docker_image_worker" {}
-variable "librato_email" {}
-variable "librato_token" {}
 variable "project_id" {}
-variable "syslog_address_com" {}
-variable "syslog_address_org" {}
 
 variable "travisci_net_external_zone_id" {
   default = "Z2RI61YP4UWSIO"
@@ -42,19 +34,23 @@ terraform {
 provider "packet" {}
 provider "aws" {}
 
+data "external" "secrets" {
+  program = ["${path.module}/../bin/generate-secrets"]
+}
+
 module "packet_network_sjc1" {
   source              = "../modules/packet_network"
-  duo_api_hostname    = "${var.duo_api_hostname}"
-  duo_integration_key = "${var.duo_integration_key}"
-  duo_secret_key      = "${var.duo_secret_key}"
+  duo_api_hostname    = "${data.external.secrets.result["duo_api_hostname"]}"
+  duo_integration_key = "${data.external.secrets.result["duo_integration_key"]}"
+  duo_secret_key      = "${data.external.secrets.result["duo_secret_key"]}"
   env                 = "${var.env}"
   facility            = "sjc1"
   github_users        = "${var.github_users}"
   index               = "${var.index}"
-  librato_email       = "${var.librato_email}"
-  librato_token       = "${var.librato_token}"
+  librato_email       = "${data.external.secrets.result["librato_email"]}"
+  librato_token       = "${data.external.secrets.result["librato_token"]}"
   project_id          = "${var.project_id}"
-  syslog_address      = "${var.syslog_address_com}"
+  syslog_address      = "${data.external.secrets.result["syslog_address_com"]}"
 }
 
 data "template_file" "worker_config_com" {
@@ -95,7 +91,7 @@ module "packet_workers_com" {
   project_id                  = "${var.project_id}"
   server_count                = 1
   site                        = "com"
-  syslog_address              = "${var.syslog_address_com}"
+  syslog_address              = "${data.external.secrets.result["syslog_address_com"]}"
   worker_config               = "${data.template_file.worker_config_com.rendered}"
   worker_docker_image_android = "${var.latest_docker_image_amethyst}"
   worker_docker_image_default = "${var.latest_docker_image_garnet}"
@@ -123,7 +119,7 @@ module "packet_workers_org" {
   project_id                  = "${var.project_id}"
   server_count                = 1
   site                        = "org"
-  syslog_address              = "${var.syslog_address_org}"
+  syslog_address              = "${data.external.secrets.result["syslog_address_org"]}"
   worker_config               = "${data.template_file.worker_config_org.rendered}"
   worker_docker_image_android = "${var.latest_docker_image_amethyst}"
   worker_docker_image_default = "${var.latest_docker_image_garnet}"

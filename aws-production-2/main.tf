@@ -1,5 +1,3 @@
-variable "aws_heroku_org" {}
-
 variable "env" {
   default = "production"
 }
@@ -9,13 +7,6 @@ variable "github_users" {}
 variable "index" {
   default = 2
 }
-
-variable "rabbitmq_password_com" {}
-variable "rabbitmq_password_org" {}
-variable "rabbitmq_username_com" {}
-variable "rabbitmq_username_org" {}
-variable "syslog_address_com" {}
-variable "syslog_address_org" {}
 
 variable "worker_ami" {
   # tfw 2018-01-08 20-33-18
@@ -46,6 +37,10 @@ provider "heroku" {
   version = "0.1.0"
 }
 
+data "external" "secrets" {
+  program = ["${path.module}/../bin/generate-secrets"]
+}
+
 data "terraform_remote_state" "vpc" {
   backend = "s3"
 
@@ -67,8 +62,8 @@ resource "random_id" "cyclist_token_org" {
 
 module "rabbitmq_worker_config_com" {
   source         = "../modules/rabbitmq_user"
-  admin_password = "${var.rabbitmq_password_com}"
-  admin_username = "${var.rabbitmq_username_com}"
+  admin_password = "${data.external.secrets.result["rabbitmq_password_com"]}"
+  admin_username = "${data.external.secrets.result["rabbitmq_username_com"]}"
   endpoint       = "https://${trimspace(file("${path.module}/config/CLOUDAMQP_URL_HOST_COM"))}"
   scheme         = "${trimspace(file("${path.module}/config/CLOUDAMQP_URL_SCHEME_COM"))}"
   username       = "travis-worker-ec2-${var.env}-${var.index}"
@@ -77,8 +72,8 @@ module "rabbitmq_worker_config_com" {
 
 module "rabbitmq_worker_config_org" {
   source         = "../modules/rabbitmq_user"
-  admin_password = "${var.rabbitmq_password_org}"
-  admin_username = "${var.rabbitmq_username_org}"
+  admin_password = "${data.external.secrets.result["rabbitmq_password_org"]}"
+  admin_username = "${data.external.secrets.result["rabbitmq_username_org"]}"
   endpoint       = "https://${trimspace(file("${path.module}/config/CLOUDAMQP_URL_HOST_ORG"))}"
   scheme         = "${trimspace(file("${path.module}/config/CLOUDAMQP_URL_SCHEME_ORG"))}"
   username       = "travis-worker-ec2-${var.env}-${var.index}"
@@ -161,7 +156,7 @@ module "aws_asg_com" {
   env                        = "${var.env}"
   env_short                  = "${var.env}"
   github_users               = "${var.github_users}"
-  heroku_org                 = "${var.aws_heroku_org}"
+  heroku_org                 = "${data.external.secrets.result["aws_heroku_org"]}"
   index                      = "${var.index}"
   registry_hostname          = "${data.terraform_remote_state.vpc.registry_hostname}"
 
@@ -173,7 +168,7 @@ module "aws_asg_com" {
   ]
 
   site                                   = "com"
-  syslog_address                         = "${var.syslog_address_com}"
+  syslog_address                         = "${data.external.secrets.result["syslog_address_com"]}"
   worker_ami                             = "${var.worker_ami}"
   worker_asg_max_size                    = 200
   worker_asg_min_size                    = 1
@@ -214,7 +209,7 @@ module "aws_asg_org" {
   env                        = "${var.env}"
   env_short                  = "${var.env}"
   github_users               = "${var.github_users}"
-  heroku_org                 = "${var.aws_heroku_org}"
+  heroku_org                 = "${data.external.secrets.result["aws_heroku_org"]}"
   index                      = "${var.index}"
   registry_hostname          = "${data.terraform_remote_state.vpc.registry_hostname}"
 
@@ -226,7 +221,7 @@ module "aws_asg_org" {
   ]
 
   site                                   = "org"
-  syslog_address                         = "${var.syslog_address_org}"
+  syslog_address                         = "${data.external.secrets.result["syslog_address_org"]}"
   worker_ami                             = "${var.worker_ami}"
   worker_asg_max_size                    = 240
   worker_asg_min_size                    = 1
@@ -313,7 +308,7 @@ module "aws_asg_cs50" {
   env                = "cs50-${var.env}"
   env_short          = "${var.env}"
   github_users       = "${var.github_users}"
-  heroku_org         = "${var.aws_heroku_org}"
+  heroku_org         = "${data.external.secrets.result["aws_heroku_org"]}"
   index              = "${var.index}"
 
   security_groups = [
@@ -324,7 +319,7 @@ module "aws_asg_cs50" {
   ]
 
   site                           = "com"
-  syslog_address                 = "${var.syslog_address_com}"
+  syslog_address                 = "${data.external.secrets.result["syslog_address_com"]}"
   worker_ami                     = "${var.worker_ami}"
   worker_asg_max_size            = 1
   worker_asg_min_size            = 1

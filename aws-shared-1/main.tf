@@ -1,10 +1,3 @@
-variable "duo_api_hostname" {}
-variable "duo_integration_key" {}
-variable "duo_secret_key" {}
-
-# TODO: correctly handle multiple values for deny_target_ip_ranges
-variable "deny_target_ip_ranges" {}
-
 variable "env" {
   default = "shared"
 }
@@ -26,8 +19,6 @@ variable "packer_build_repo" {
 variable "public_subnet_1b_cidr" {
   default = "10.10.1.0/24"
 }
-
-variable "syslog_address_com" {}
 
 variable "travisci_net_external_zone_id" {
   default = "Z2RI61YP4UWSIO"
@@ -63,6 +54,10 @@ terraform {
 }
 
 provider "aws" {}
+
+data "external" "secrets" {
+  program = ["${path.module}/../bin/generate-secrets"]
+}
 
 data "aws_ami" "nat" {
   most_recent = true
@@ -156,7 +151,7 @@ resource "aws_default_network_acl" "default" {
     protocol   = -1
     rule_no    = 50
     action     = "deny"
-    cidr_block = "${var.deny_target_ip_ranges}"
+    cidr_block = "${data.external.secrets.result["deny_target_ip_ranges"]}"
     from_port  = 0
     to_port    = 0
   }
@@ -261,14 +256,14 @@ module "aws_bastion_1b" {
   az                            = "1b"
   bastion_ami                   = "${data.aws_ami.bastion.id}"
   bastion_instance_type         = "t2.nano"
-  duo_api_hostname              = "${var.duo_api_hostname}"
-  duo_integration_key           = "${var.duo_integration_key}"
-  duo_secret_key                = "${var.duo_secret_key}"
+  duo_api_hostname              = "${data.external.secrets.result["duo_api_hostname"]}"
+  duo_integration_key           = "${data.external.secrets.result["duo_integration_key"]}"
+  duo_secret_key                = "${data.external.secrets.result["duo_secret_key"]}"
   env                           = "${var.env}"
   github_users                  = "${var.github_users}"
   index                         = "${var.index}"
   public_subnet_id              = "${aws_subnet.public_1b.id}"
-  syslog_address                = "${var.syslog_address_com}"
+  syslog_address                = "${data.external.secrets.result["syslog_address_com"]}"
   travisci_net_external_zone_id = "${var.travisci_net_external_zone_id}"
   vpc_id                        = "${aws_vpc.main.id}"
 }

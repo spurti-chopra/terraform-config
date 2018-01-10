@@ -12,7 +12,7 @@ TAR := tar
 test:
 	./runtests --env .example.env
 
-include $(shell git rev-parse --show-toplevel)/terraform-common.mk
+include $(shell git rev-parse --show-toplevel)/terraform.mk
 
 .PHONY: assert-clean
 assert-clean:

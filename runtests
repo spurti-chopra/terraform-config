@@ -34,7 +34,7 @@ main() {
   fi
 
   local terraform
-  terraform="$(make -f terraform-common.mk .echo-tf)"
+  terraform="$(make -f terraform.mk .echo-tf)"
 
   if [[ "${env_file}" ]]; then
     echo "Running isolated with env ${env_file}"
@@ -79,7 +79,7 @@ main() {
     if [[ -f "${d}/Makefile" ]]; then
       terraform="$(make -f "${d}/Makefile" .echo-tf)"
     else
-      terraform="$(make -f terraform-common.mk .echo-tf)"
+      terraform="$(make -f terraform.mk .echo-tf)"
     fi
     if [[ -f "${d}/.terraform-validate-flags" ]]; then
       # shellcheck disable=SC2046

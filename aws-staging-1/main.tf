@@ -1,5 +1,3 @@
-variable "aws_heroku_org" {}
-
 variable "env" {
   default = "staging"
 }
@@ -13,8 +11,6 @@ variable "index" {
 variable "latest_docker_image_amethyst" {}
 variable "latest_docker_image_garnet" {}
 variable "latest_docker_image_worker" {}
-variable "syslog_address_com" {}
-variable "syslog_address_org" {}
 
 terraform {
   backend "s3" {
@@ -30,6 +26,10 @@ provider "aws" {}
 
 provider "heroku" {
   version = "0.1.0"
+}
+
+data "external" "secrets" {
+  program = ["${path.module}/../bin/generate-secrets"]
 }
 
 data "aws_ami" "tfw" {
@@ -122,7 +122,7 @@ module "aws_asg_com" {
   env                = "${var.env}"
   env_short          = "${var.env}"
   github_users       = "${var.github_users}"
-  heroku_org         = "${var.aws_heroku_org}"
+  heroku_org         = "${data.external.secrets.result["aws_heroku_org"]}"
   index              = "${var.index}"
   registry_hostname  = "${data.terraform_remote_state.vpc.registry_hostname}"
 
@@ -132,7 +132,7 @@ module "aws_asg_com" {
   ]
 
   site                           = "com"
-  syslog_address                 = "${var.syslog_address_com}"
+  syslog_address                 = "${data.external.secrets.result["syslog_address_com"]}"
   worker_ami                     = "${data.aws_ami.tfw.id}"
   worker_asg_max_size            = 3
   worker_asg_min_size            = 0
@@ -169,7 +169,7 @@ module "aws_asg_org" {
   env                = "${var.env}"
   env_short          = "${var.env}"
   github_users       = "${var.github_users}"
-  heroku_org         = "${var.aws_heroku_org}"
+  heroku_org         = "${data.external.secrets.result["aws_heroku_org"]}"
   index              = "${var.index}"
   registry_hostname  = "${data.terraform_remote_state.vpc.registry_hostname}"
 
@@ -179,7 +179,7 @@ module "aws_asg_org" {
   ]
 
   site                           = "org"
-  syslog_address                 = "${var.syslog_address_org}"
+  syslog_address                 = "${data.external.secrets.result["syslog_address_org"]}"
   worker_ami                     = "${data.aws_ami.tfw.id}"
   worker_asg_max_size            = 3
   worker_asg_min_size            = 0

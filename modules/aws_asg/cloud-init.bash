@@ -47,6 +47,31 @@ main() {
   dig +short "${registry_hostname}" | while read -r ipv4; do
     iptables -I DOCKER -s "${ipv4}" -j DROP || true
   done
+
+  __install_sysdig
+}
+
+get_env() {
+  if [[ "$(hostname)" == *"staging"* ]]; then
+    echo "staging"
+  else
+    echo "production"
+  fi
+}
+
+__install_sysdig() {
+  echo "Installing Sysdig..."
+  source /etc/default/travis-worker
+  source /etc/default/travis-worker-cloud-init
+  if [ -z "${TRAVIS_WORKER_SYSDIG_ACCESS_KEY}" ]; then
+    echo "TRAVIS_WORKER_SYSDIG_ACCESS_KEY not defined! Aborting."
+    exit 1
+  fi
+  # Note: this is a temporary measure to install Sysdig at runtime.
+  # If Sysdig is adopted we should instead install it in packer-templates.
+  curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash
+  curl -s https://s3.amazonaws.com/download.draios.com/stable/install-agent | sudo bash -s -- --access_key "$TRAVIS_WORKER_SYSDIG_ACCESS_KEY" --tags "site:$TRAVIS_WORKER_TRAVIS_SITE,env:$(get_env)"
+  echo "Sysdig installed."
 }
 
 __wait_for_docker() {

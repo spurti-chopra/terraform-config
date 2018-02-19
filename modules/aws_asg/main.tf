@@ -131,6 +131,8 @@ variable "worker_subnets" {
   type = "list"
 }
 
+variable "sysdig_access_key" {}
+
 data "template_file" "cloud_init_env" {
   template = <<EOF
 export CYCLIST_AUTH_TOKEN="${var.cyclist_auth_token}"
@@ -152,6 +154,7 @@ export TRAVIS_WORKER_PRESTART_HOOK="/var/tmp/travis-run.d/travis-worker-prestart
 export TRAVIS_WORKER_SELF_IMAGE="${var.worker_docker_self_image}"
 export TRAVIS_WORKER_START_HOOK="/var/tmp/travis-run.d/travis-worker-start-hook"
 export TRAVIS_WORKER_STOP_HOOK="/var/tmp/travis-run.d/travis-worker-stop-hook"
+export TRAVIS_WORKER_SYSDIG_ACCESS_KEY="${var.sysdig_access_key}"
 EOF
 }
 

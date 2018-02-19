@@ -13,6 +13,7 @@ variable "index" {
 variable "latest_docker_image_amethyst" {}
 variable "latest_docker_image_garnet" {}
 variable "latest_docker_image_worker" {}
+variable "sysdig_access_key" {}
 variable "syslog_address_com" {}
 variable "syslog_address_org" {}
 
@@ -132,6 +133,7 @@ module "aws_asg_com" {
   ]
 
   site                           = "com"
+  sysdig_access_key              = "${var.sysdig_access_key}"
   syslog_address                 = "${var.syslog_address_com}"
   worker_ami                     = "${data.aws_ami.tfw.id}"
   worker_asg_max_size            = 3
@@ -179,6 +181,7 @@ module "aws_asg_org" {
   ]
 
   site                           = "org"
+  sysdig_access_key              = "${var.sysdig_access_key}"
   syslog_address                 = "${var.syslog_address_org}"
   worker_ami                     = "${data.aws_ami.tfw.id}"
   worker_asg_max_size            = 3

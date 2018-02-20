@@ -61,7 +61,9 @@ get_env() {
 
 __install_sysdig() {
   echo "Installing Sysdig..."
+  # shellcheck disable=SC1091
   source /etc/default/travis-worker
+  # shellcheck disable=SC1091
   source /etc/default/travis-worker-cloud-init
   if [ -z "${TRAVIS_WORKER_SYSDIG_ACCESS_KEY}" ]; then
     echo "TRAVIS_WORKER_SYSDIG_ACCESS_KEY not defined! Aborting."

@@ -72,7 +72,7 @@ __install_sysdig() {
   # Note: this is a temporary measure to install Sysdig at runtime.
   # If Sysdig is adopted we should instead install it in packer-templates.
   curl -s https://s3.amazonaws.com/download.draios.com/stable/install-sysdig | sudo bash
-  curl -s https://s3.amazonaws.com/download.draios.com/stable/install-agent | sudo bash -s -- --access_key "$TRAVIS_WORKER_SYSDIG_ACCESS_KEY" --tags "site:$TRAVIS_WORKER_TRAVIS_SITE,env:$(get_env)"
+  curl -s https://s3.amazonaws.com/download.draios.com/stable/install-agent | sudo bash -s -- --access_key "$TRAVIS_WORKER_SYSDIG_ACCESS_KEY" --tags "site:$TRAVIS_WORKER_TRAVIS_SITE,env:$(get_env)" --additional_conf "security: {enabled: true}\ncommandlines_capture: {enabled: true}\nmemdump: {enabled: true}"
   echo "Sysdig installed."
 }
 

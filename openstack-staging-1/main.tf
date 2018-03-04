@@ -55,6 +55,7 @@ module "os_worker" {
   provider          = "${var.provider}"
   key_name          = "${var.key_name}"
   availability_zone = "${var.availability_zone}"
+
   worker_config     = <<EOF
 ### worker.env
 ${file("${path.module}/worker.env")}

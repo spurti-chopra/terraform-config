@@ -36,7 +36,9 @@ __install_go() {
 
 __build_travis_worker() {
 
-  PATH=${PATH}:/usr/local/go/bin:$(go env GOPATH)/bin
+  export GOPATH
+  PATH=${PATH}:/usr/local/go/bin
+  PATH=${PATH}:$(go env GOPATH)/bin
   export PATH
 
   if [ ! -f "${GOPATH}/bin/travis-worker" ]; then

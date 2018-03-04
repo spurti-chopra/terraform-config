@@ -85,8 +85,8 @@ __start_worker_service() {
 }
 
 __start_docker_service() {
-    systemctl enable docker || true
-    systemctl start docker || true
+  systemctl enable docker || true
+  systemctl start docker || true
 }
 
 main "$@"

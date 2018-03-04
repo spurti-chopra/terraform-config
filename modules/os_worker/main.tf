@@ -12,6 +12,7 @@ variable "availability_zone" {}
 
 data "template_file" "cloud_config" {
   template = "${file("${path.module}/cloud-config.yml.tpl")}"
+
   vars {
     here          = "${path.module}"
     worker_config = "${var.worker_config}"

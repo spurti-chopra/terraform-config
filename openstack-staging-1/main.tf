@@ -56,7 +56,7 @@ module "os_worker" {
   key_name          = "${var.key_name}"
   availability_zone = "${var.availability_zone}"
 
-  worker_config     = <<EOF
+  worker_config = <<EOF
 ### worker.env
 ${file("${path.module}/worker.env")}
 export TRAVIS_WORKER_HARD_TIMEOUT=120m

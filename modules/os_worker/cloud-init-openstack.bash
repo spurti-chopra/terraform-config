@@ -26,7 +26,7 @@ __start_worker_service() {
 }
 __install_go() {
   if [ ! -f "${TMP}/go${GO_VERSION}.linux-ppc64le.tar.gz" ]; then
-    wget -P ${TMP} "https://storage.googleapis.com/golang/go${GO_VERSION}.linux-ppc64le.tar.gz"
+    wget -P "${TMP}" "https://storage.googleapis.com/golang/go${GO_VERSION}.linux-ppc64le.tar.gz"
   fi
   if [ ! -f /usr/local/bin/go ]; then
     tar -C "${TMP}" -xf "${TMP}/go${GO_VERSION}.linux-ppc64le.tar.gz"
@@ -36,8 +36,8 @@ __install_go() {
 
 __build_travis_worker() {
 
-  export PATH=${PATH}:/usr/local/go/bin
-  export PATH=${PATH}:$(go env GOPATH)/bin
+  PATH=${PATH}:/usr/local/go/bin:$(go env GOPATH)/bin
+  export PATH
 
   if [ ! -f "${GOPATH}/bin/travis-worker" ]; then
     mkdir -p "${GOPATH}/src/github.com/travis-ci"
